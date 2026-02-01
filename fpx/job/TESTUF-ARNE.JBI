@@ -1,36 +1,80 @@
 /JOB
 //NAME TESTUF-ARNE
 //POS
-///NPOS 2,0,0,2,0,0
+///NPOS 4,0,0,4,0,0
 ///TOOL 1
 ///POSTYPE PULSE
 ///PULSE
 C00000=17473,-27809,37525,12674,-77479,22303
 C00001=8199,58529,121180,5358,-81906,29470
+C00002=17473,-27809,37525,12674,-77479,22303
+C00003=8199,58529,121180,5358,-81906,29470
 ///POSTYPE ROBOT
 ///RECTAN
 ///RCONF 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 P00124=780.361,197.265,599.550,158.7046,-21.1320,16.3034
-P00126=780.361,297.265,599.550,158.7046,-21.1320,16.3034
+P00125=780.361,297.265,599.550,158.7046,-21.1320,16.3034
+P00126=780.361,197.265,449.550,158.7046,-21.1320,16.3034
+P00127=780.361,297.265,449.550,158.7046,-21.1320,16.3034
 //INST
 ///DATE 2025/03/25 13:14
 ///ATTR SC,RW
 ///GROUP1 RB1
 NOP
-MOVL C00000 V=166.7  //ORG
-MOVL C00001 V=166.7  //XX
-PAUSE
-PAUSE
-GETPOS PX124 STEP#(1)
-GETPOS PX125 STEP#(2)
-'Store captured positions in global variables
-SET P001 PX124 ' Weld Start Point
-SET P002 PX125 ' Weld End Point
+'===========================================
+' FPX 4-Point Teaching Job
+' Teaches all 4 weld start/end points for X-seam
+' P001 = BOVEN Start, P002 = BOVEN End
+' P003 = ONDER Start, P004 = ONDER End
+'===========================================
+
+'--- STEP 1: Teach BOVEN (Top) Points ---
+DOUT OT#(46) ON
+MSG "TEACH BOVEN (TOP) START POINT"
+MOVL C00000 V=166.7  'Approach BOVEN start area
+PAUSE                 'Operator positions torch at BOVEN start
+GETPOS PX124 STEP#(1) 'Capture BOVEN start position
+MSG "BOVEN START CAPTURED"
+
+MSG "TEACH BOVEN (TOP) END POINT"
+MOVL C00001 V=166.7  'Approach BOVEN end area
+PAUSE                 'Operator positions torch at BOVEN end
+GETPOS PX125 STEP#(2) 'Capture BOVEN end position
+MSG "BOVEN END CAPTURED"
+
+'--- STEP 2: Teach ONDER (Bottom) Points ---
+MSG "TEACH ONDER (BOTTOM) START POINT"
+MOVL C00002 V=166.7  'Approach ONDER start area
+PAUSE                 'Operator positions torch at ONDER start
+GETPOS PX126 STEP#(3) 'Capture ONDER start position
+MSG "ONDER START CAPTURED"
+
+MSG "TEACH ONDER (BOTTOM) END POINT"
+MOVL C00003 V=166.7  'Approach ONDER end area
+PAUSE                 'Operator positions torch at ONDER end
+GETPOS PX127 STEP#(4) 'Capture ONDER end position
+MSG "ONDER END CAPTURED"
+
+'--- STEP 3: Store Global Position Variables ---
+SET P001 PX124  'BOVEN Start Point
+SET P002 PX125  'BOVEN End Point
+SET P003 PX126  'ONDER Start Point
+SET P004 PX127  'ONDER End Point
+
+'--- STEP 4: Create User Frame from BOVEN Points ---
+' Convert to robot frame for user frame calculation
 CNVRT PX124 PX124 RF
 CNVRT PX125 PX125 RF
+' Create third point for frame definition (offset in Y)
 SET P126 P124
 GETE D098 P124 (2)
-ADD D098 100000
+ADD D098 100000       'Add 100mm Y offset
 SETE P126 (2) D098
+' Define User Frame 15
 MFRAME UF#(15) PX124 PX125 PX126
+
+'--- Complete ---
+DOUT OT#(46) OFF
+MSG "4-POINT TEACHING COMPLETE"
+MSG "UF#(15) DEFINED"
 END

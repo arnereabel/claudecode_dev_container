@@ -113,15 +113,13 @@ REFP 1 C00000 ' Define Reference Point 1 (e.g., Wall Direction)
 REFP 2 C00001 ' Define Reference Point 2 (e.g., Horizontal Wall Direction)
 ' Move to approach point near weld start
 MOVJ C00002 T0000 VJ=50.00
-' Move linearly to the dynamic weld start point (P001) with precise stop (PL=0)
-' P001's coordinates (X,Y,Z,Rx,Ry,Rz) are set in TESTUF-ARNE.JBI based on taught origin
+' Move linearly to the taught weld start point P001 (from TESTUF-ARNE)
 MOVL P001 T0001 V=83.3 PL=0
 ' Start Arc Welding process
 ARCON
 ' Start Weaving pattern using parameters stored in D080, D081, D082 (set by WEAVING macro)
 WVON AMP=D080 FREQ=D081 ANGL=D082
-' Move linearly along the weld path to the dynamic weld end point (P002)
-' P002's coordinates (X,Y,Z,Rx,Ry,Rz) are set in TESTUF-ARNE.JBI based on taught X-axis point
+' Move linearly to the taught weld end point P002 (from TESTUF-ARNE)
 MOVL P002 T0002 V=5.0
 ' Stop Weaving pattern
 WVOF
