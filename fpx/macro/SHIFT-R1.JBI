@@ -7,19 +7,34 @@
 ///COMM
 ///ATTR SC,RW,MC
 ///GROUP1 RB1
-///LVARS 1,0,6,6,0,0,0,0
+///LVARS 2,0,6,6,0,0,0,0
 NOP
 '################################
-'P-Variable defenition
+' SHIFT-R1 Macro - Position Shift with Configurable User Frame
+' Arguments:
+'   IARG#(1) = X shift (mm)
+'   IARG#(2) = Y shift (mm)
+'   IARG#(3) = Z shift (mm)
+'   IARG#(4) = Rx shift (deg)
+'   IARG#(5) = Ry shift (deg)
+'   IARG#(6) = Rz shift (deg)
+'   IARG#(7) = User Frame number (15=BOVEN, 25=ONDER)
+'################################
+'P-Variable definition
 SET LB000 111 
-'Argumente einlesen
-GETARG LR000 IARG#(1) 'x
-GETARG LR001 IARG#(2)
-GETARG LR002 IARG#(3)
-GETARG LR003 IARG#(4)
-GETARG LR004 IARG#(5)
-GETARG LR005 IARG#(6)
-'calculate shift
+'Read arguments
+GETARG LR000 IARG#(1) 'X
+GETARG LR001 IARG#(2) 'Y
+GETARG LR002 IARG#(3) 'Z
+GETARG LR003 IARG#(4) 'Rx
+GETARG LR004 IARG#(5) 'Ry
+GETARG LR005 IARG#(6) 'Rz
+GETARG LB001 IARG#(7) 'User Frame number
+'Default to UF#15 if not specified
+JUMP *SETUF IF LB001>0
+SET LB001 15
+*SETUF
+'Calculate shift (convert to controller units)
 MUL LR000 1000
 MUL LR001 1000
 MUL LR002 1000
@@ -32,13 +47,13 @@ SET LD002 LR002
 SET LD003 LR003
 SET LD004 LR004
 SET LD005 LR005
-'set the shift in the p variable
+'Set the shift in the P variable
 SETE P[LB000] (1) LD000
 SETE P[LB000] (2) LD001
 SETE P[LB000] (3) LD002
 SETE P[LB000] (4) LD003
 SETE P[LB000] (5) LD004
 SETE P[LB000] (6) LD005
-'add the calculated shift
-SFTON P[LB000] UF#(15)
+'Apply the calculated shift with specified user frame
+SFTON P[LB000] UF#[LB001]
 END

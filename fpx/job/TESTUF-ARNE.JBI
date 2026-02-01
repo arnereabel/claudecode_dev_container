@@ -61,20 +61,34 @@ SET P002 PX125  'BOVEN End Point
 SET P003 PX126  'ONDER Start Point
 SET P004 PX127  'ONDER End Point
 
-'--- STEP 4: Create User Frame from BOVEN Points ---
+'--- STEP 4: Create User Frame 15 from BOVEN Points ---
 ' Convert to robot frame for user frame calculation
 CNVRT PX124 PX124 RF
 CNVRT PX125 PX125 RF
-' Create third point for frame definition (offset in Y)
+' Create third point for BOVEN frame definition (offset in Y)
 SET P126 P124
 GETE D098 P124 (2)
 ADD D098 100000       'Add 100mm Y offset
 SETE P126 (2) D098
-' Define User Frame 15
+' Define User Frame 15 (BOVEN)
 MFRAME UF#(15) PX124 PX125 PX126
+MSG "UF#15 (BOVEN) DEFINED"
+
+'--- STEP 5: Create User Frame 25 from ONDER Points ---
+' Convert to robot frame for user frame calculation
+CNVRT PX126 PX126 RF
+CNVRT PX127 PX127 RF
+' Create third point for ONDER frame definition (offset in Y)
+SET P128 P126
+GETE D099 P126 (2)
+ADD D099 100000       'Add 100mm Y offset
+SETE P128 (2) D099
+' Define User Frame 25 (ONDER)
+MFRAME UF#(25) PX126 PX127 PX128
+MSG "UF#25 (ONDER) DEFINED"
 
 '--- Complete ---
 DOUT OT#(46) OFF
 MSG "4-POINT TEACHING COMPLETE"
-MSG "UF#(15) DEFINED"
+MSG "UF#15 BOVEN / UF#25 ONDER"
 END
