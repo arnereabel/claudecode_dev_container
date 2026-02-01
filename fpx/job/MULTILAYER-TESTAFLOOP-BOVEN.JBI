@@ -21,9 +21,25 @@ C00005=337.218,-4.873,113.278,157.8673,-23.8011,16.4152
 ///GROUP1 RB1
 ///LVARS 20,20,20,0,0,0,0,0
 NOP
+'==========================================================
+' MULTILAYER-TESTAFLOOP-BOVEN - Top Side Multi-Layer Welding
+'==========================================================
+' Purpose: Executes multi-layer welding on the TOP (BOVEN) side
+'          of the X-seam joint for 120mm plate (60mm bevel)
+'
+' User Frame: UF#15 (defined in TESTUF-ARNE.JBI)
+' Weld Points: P001 (start), P002 (end) - taught in TESTUF-ARNE
+'
+' Macros Used:
+'   MJ#(0) = ESAB1JOB   - Weld job selection
+'   MJ#(1) = SHIFT-R1   - Position shift (7th arg = UF#15)
+'   MJ#(2) = WEAVING    - Weave pattern parameters
+'
+' Layer Counter: B098 tracks current layer, B096 stores total
+'==========================================================
 GETARG LB000 IARG#(1)
 ADD B096 LB000
-'=========
+'--- Layer Selection Logic ---
 MACRO1 MJ#(0) ARGF10
 DOUT OT#(46) ON
 TIMER T=0.50

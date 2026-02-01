@@ -21,9 +21,29 @@ C00005=373.548,-0.562,-95.661,-22.7652,27.8224,-16.4335
 ///GROUP1 RB1
 ///LVARS 20,20,20,0,0,0,0,0
 NOP
+'==========================================================
+' MULTILAYER-TESTAFLOOP-ONDER - Bottom Side Multi-Layer Welding
+'==========================================================
+' Purpose: Executes multi-layer welding on the BOTTOM (ONDER) side
+'          of the X-seam joint for 120mm plate (60mm bevel)
+'
+' User Frame: UF#25 (defined in TESTUF-ARNE.JBI) - SEPARATE from BOVEN
+' Weld Points: P003 (start), P004 (end) - taught directly in TESTUF-ARNE
+'
+' NOTE: Unlike previous version, P003/P004 are now taught directly
+'       instead of being calculated from P001/P002 with Z-offset.
+'       This provides more accurate positioning for the bottom weld.
+'
+' Macros Used:
+'   MJ#(0) = ESAB1JOB   - Weld job selection (job 11)
+'   MJ#(1) = SHIFT-R1   - Position shift (7th arg = UF#25)
+'   MJ#(2) = WEAVING    - Weave pattern parameters
+'
+' Layer Counter: B099 tracks current layer, B097 stores total
+'==========================================================
 GETARG LB000 IARG#(1)
 ADD B097 LB000
-'=====
+'--- Layer Selection Logic ---
 MACRO1 MJ#(0) ARGF11
 DOUT OT#(46) ON
 TIMER T=0.50
