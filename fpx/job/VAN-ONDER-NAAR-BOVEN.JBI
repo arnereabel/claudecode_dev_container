@@ -15,9 +15,26 @@ C00004=-5869,-28950,85500,-7487,-122252,35389
 ///ATTR SC,RW
 ///GROUP1 RB1
 NOP
+'==========================================================
+' VAN-ONDER-NAAR-BOVEN - Bottom to Top Transition Path
+'==========================================================
+' Purpose: Moves robot from ONDER (bottom) welding position
+'          back to BOVEN (top) welding position safely.
+'
+' Motion: 5-point joint-interpolated path at full speed (VJ=100)
+'         using pulse coordinates. Reverse of VAN-BOVEN-NAAR-ONDER.
+'
+' Called by: MASTER-START-ML (between ONDER and BOVEN passes)
+' Reverse:  VAN-BOVEN-NAAR-ONDER
+'==========================================================
+' Waypoint 1: Retract from ONDER area
 MOVJ C00000 VJ=100.00
+' Waypoint 2: Intermediate - begin wrist reorientation
 MOVJ C00001 VJ=100.00
+' Waypoint 3: Intermediate - wrist flip for BOVEN orientation
 MOVJ C00002 VJ=100.00
+' Waypoint 4: Intermediate - approach BOVEN side
 MOVJ C00003 VJ=100.00
+' Waypoint 5: Final BOVEN approach position (same as VAN-BOVEN-NAAR-ONDER start)
 MOVJ C00004 VJ=100.00
 END

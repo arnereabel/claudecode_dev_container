@@ -44,6 +44,13 @@ JBI files are uploaded directly to the Yaskawa controller via:
 - Ethernet (FTP/SFTP)
 - YRC1000 programming pendant
 
+### Simulation
+- **MotoSim** (Yaskawa MotoSimEG-VRC) for offline verification
+- Always validate JBI changes in MotoSim before deploying to physical robot
+
+### Controller
+- **Target**: YRC1000
+
 ## Important Notes
 
 1. **User Frame 15** is the primary workpiece frame

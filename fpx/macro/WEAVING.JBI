@@ -8,13 +8,34 @@
 ///GROUP1 RB1
 ///LVARS 5,5,5,5,0,0,0,0
 NOP
-GETARG LR000 IARG#(1)
-GETARG LR001 IARG#(2)
-GETARG LR002 IARG#(3)
-MUL LR000 10
-MUL LR001 10
-MUL LR002 10
-SET D080 LR000
-SET D081 LR001
-SET D082 LR002
+'==========================================================
+' WEAVING - Weave Pattern Parameter Macro
+'==========================================================
+' Purpose: Sets weave pattern for the welding torch oscillation.
+'          Parameters are stored in D-registers for WVON command.
+'
+' Arguments:
+'   IARG#(1) = Amplitude (mm) - side-to-side swing width
+'   IARG#(2) = Frequency (Hz) - cycles per second
+'   IARG#(3) = Angle (deg)    - weave direction angle
+'
+' Output Registers (used by WVON in welding jobs):
+'   D080 = Amplitude (in 0.1mm units, input x10)
+'   D081 = Frequency (in 0.1Hz units, input x10)
+'   D082 = Angle     (in 0.1deg units, input x10)
+'
+' Example: MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
+'          → D080=15 (1.5mm), D081=15 (1.5Hz), D082=150 (15.0°)
+'==========================================================
+GETARG LR000 IARG#(1)  'Amplitude (mm)
+GETARG LR001 IARG#(2)  'Frequency (Hz)
+GETARG LR002 IARG#(3)  'Angle (deg)
+'--- Convert to controller units (multiply by 10) ---
+MUL LR000 10            'mm → 0.1mm
+MUL LR001 10            'Hz → 0.1Hz
+MUL LR002 10            'deg → 0.1deg
+'--- Store in global D-registers for WVON ---
+SET D080 LR000           'Weave amplitude
+SET D081 LR001           'Weave frequency
+SET D082 LR002           'Weave angle
 END

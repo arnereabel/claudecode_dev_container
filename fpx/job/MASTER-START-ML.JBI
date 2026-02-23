@@ -8,23 +8,54 @@
 ///ATTR SC,RW
 ///GROUP1 RB1
 NOP
-SET B096 0
-SET B097 0
-SET B098 0
-SET B099 0
+'==========================================================
+' MASTER-START-ML - Multi-Layer X-Seam Welding Orchestrator
+'==========================================================
+' Purpose: Controls the complete multi-layer welding sequence
+'          for 120mm thick plate X-seam (60mm bevel per side)
+'
+' Strategy: Alternates between BOVEN (top) and ONDER (bottom)
+'           to manage heat input and minimize distortion.
+'           Each call adds N layers via ARGF argument.
+'
+' Counters:
+'   B096 = BOVEN total target layer count
+'   B097 = ONDER total target layer count
+'   B098 = BOVEN current layer index (0-based)
+'   B099 = ONDER current layer index (0-based)
+'
+' Layer Distribution:
+'   BOVEN: 1 + 3 + 3 + 5 = 12 layers (labels *0 to *11)
+'   ONDER: 3 + 3 + 7 + 6 = 19 layers (labels *0 to *18)
+'   Total: 31 weld passes
+'
+' Prerequisites: Run TESTUF-ARNE first to define UF#15/UF#25
+'==========================================================
+SET B096 0   'Reset BOVEN total layer counter
+SET B097 0   'Reset ONDER total layer counter
+SET B098 0   'Reset BOVEN current layer index
+SET B099 0   'Reset ONDER current layer index
+'--- Pass 1: Root layer BOVEN (1 layer: *0) ---
 CALL JOB:MULTILAYER-TESTAFLOOP-BOVEN ARGF1
 CALL JOB:VAN-BOVEN-NAAR-ONDER
+'--- Pass 2: First ONDER batch (3 layers: *0-*2) ---
 CALL JOB:MULTILAYER-TESTAFLOOP-ONDER ARGF3
 CALL JOB:VAN-ONDER-NAAR-BOVEN
+'--- Pass 3: BOVEN fill (3 layers: *1-*3) ---
 CALL JOB:MULTILAYER-TESTAFLOOP-BOVEN ARGF3
 CALL JOB:VAN-BOVEN-NAAR-ONDER
+'--- Pass 4: ONDER fill (3 layers: *3-*5) ---
 CALL JOB:MULTILAYER-TESTAFLOOP-ONDER ARGF3
 CALL JOB:VAN-ONDER-NAAR-BOVEN
+'--- Pass 5: BOVEN fill (3 layers: *4-*6) ---
 CALL JOB:MULTILAYER-TESTAFLOOP-BOVEN ARGF3
 CALL JOB:VAN-BOVEN-NAAR-ONDER
+'--- Pass 6: Large ONDER batch (7 layers: *6-*12) ---
 CALL JOB:MULTILAYER-TESTAFLOOP-ONDER ARGF7
 CALL JOB:VAN-ONDER-NAAR-BOVEN
+'--- Pass 7: BOVEN cap (5 layers: *7-*11) ---
 CALL JOB:MULTILAYER-TESTAFLOOP-BOVEN ARGF5
 CALL JOB:VAN-BOVEN-NAAR-ONDER
-CALL JOB:MULTILAYER-TESTAFLOOP-ONDER ARGF5
+'--- Pass 8: Final ONDER cap (6 layers: *13-*18) ---
+CALL JOB:MULTILAYER-TESTAFLOOP-ONDER ARGF6
 END

@@ -41,162 +41,174 @@ NOP
 '
 ' Layer Counter: B099 tracks current layer, B097 stores total
 '==========================================================
-GETARG LB000 IARG#(1)
-ADD B097 LB000
+GETARG LB000 IARG#(1)         'Get number of layers to add this pass
+ADD B097 LB000                'Accumulate into total target
 '--- Layer Selection Logic ---
-MACRO1 MJ#(0) ARGF11
-DOUT OT#(46) ON
-TIMER T=0.50
-JUMP LABEL: B099
+' Each label *N contains parameters for layer N.
+' JUMP LABEL: B099 jumps to the label matching current layer index.
+' Note: ONDER shifts are negative Z (going deeper below surface)
+'       and uses weave angles (5/15/25 deg) for groove tracking.
+MACRO1 MJ#(0) ARGF11         'Pre-select ESAB weld job 11 (ONDER)
+DOUT OT#(46) ON              'Enable external weld signal
+TIMER T=0.50                  'Wait for signal stabilization
+JUMP LABEL: B099              'Jump to current layer
+'--- Layer 0: Root pass (no shift, weave 15deg for groove tracking) ---
 *0
 SFTOF
 MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
 MACRO1 MJ#(1) ARGF0.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
+'--- Layer 1: Hot pass - slight right (Y-0.5, Z-7, Rx+8deg) ---
 *1
 SFTOF
 MACRO1 MJ#(0) ARGF11
-MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF5.0
+MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF5.0     'Tighter weave for edge fusion
 MACRO1 MJ#(1) ARGF0.0 ARGF-0.5 ARGF-7.0 ARGF8.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
+'--- Layer 2: Fill - slight left (Y+0.5, Z-7, Rx-8deg) ---
 *2
-'LAS 3
 SFTOF
 MACRO1 MJ#(0) ARGF11
-MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF25.0
+MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF25.0    'Wide angle for groove wall fusion
 MACRO1 MJ#(1) ARGF0.0 ARGF0.5 ARGF-7.0 ARGF-8.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
+'--- Layer 3: Fill - left wall (Y+3, Z-10, Rx-10deg) ---
 *3
-'LAS 4
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF25.0
 MACRO1 MJ#(1) ARGF0.0 ARGF3.0 ARGF-10.0 ARGF-10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
+'--- Layer 4: Fill - center (Y=0, Z-10, Rx neutral) ---
 *4
-'LAS 5
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
 MACRO1 MJ#(1) ARGF0.0 ARGF0.0 ARGF-10.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
+'--- Layer 5: Fill - right wall (Y-3, Z-10, Rx+10deg) ---
 *5
-'LAS 6
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF5.0
 MACRO1 MJ#(1) ARGF0.0 ARGF-3.0 ARGF-10.0 ARGF10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 7
+'--- Layer 6: Fill - far right wall (Y-5.5, Z-13, Rx+10deg) ---
 *6
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF5.0
 MACRO1 MJ#(1) ARGF0.0 ARGF-5.5 ARGF-13.0 ARGF10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 8
+'--- Layer 7: Fill - center (Y=0, Z-13, Rx neutral) ---
 *7
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
 MACRO1 MJ#(1) ARGF0.0 ARGF0.0 ARGF-13.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 9
+'--- Layer 8: Fill - left wall (Y+5.5, Z-11, Rx-10deg) ---
 *8
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF25.0
 MACRO1 MJ#(1) ARGF0.0 ARGF5.5 ARGF-11.0 ARGF-10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 10
+'--- Layer 9: Fill - far left wall (Y+7.5, Z-15, Rx-10deg) ---
 *9
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF25.0
 MACRO1 MJ#(1) ARGF0.0 ARGF7.5 ARGF-15.0 ARGF-10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 11
+'--- Layer 10: Fill - center-left (Y+3, Z-15, Rx neutral) ---
 *10
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
 MACRO1 MJ#(1) ARGF0.0 ARGF3.0 ARGF-15.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 12
+'--- Layer 11: Fill - center-right (Y-3, Z-15, Rx neutral) ---
 *11
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
 MACRO1 MJ#(1) ARGF0.0 ARGF-3.0 ARGF-15.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 13
+'--- Layer 12: Fill - far right wall deep (Y-7, Z-16, Rx+10deg) ---
 *12
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF5.0
 MACRO1 MJ#(1) ARGF0.0 ARGF-7.0 ARGF-16.0 ARGF10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 14
+'--- Layer 13: Fill - far left wall deep (Y+8.5, Z-20, Rx-10deg) ---
 *13
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF25.0
 MACRO1 MJ#(1) ARGF0.0 ARGF8.5 ARGF-20.0 ARGF-10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 15
+'--- Layer 14: Cap - center-left (Y+4, Z-20, Rx neutral) ---
 *14
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
 MACRO1 MJ#(1) ARGF0.0 ARGF4.0 ARGF-20.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 16
+'--- Layer 15: Cap - center-right (Y-1, Z-20, Rx neutral) ---
 *15
 SFTOF
 MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
 MACRO1 MJ#(1) ARGF0.0 ARGF-1.0 ARGF-20.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 17
+'--- Layer 16: Cap - right of center (Y-5, Z-20, Rx neutral) ---
 *16
-MACRO1 MJ#(0) ARGF11
 SFTOF
+MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.5 ARGF1.5 ARGF15.0
 MACRO1 MJ#(1) ARGF0.0 ARGF-5.0 ARGF-20.0 ARGF0.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 18
+'--- Layer 17: Cap - far right wall deep (Y-9, Z-23, Rx+10deg) ---
 *17
-MACRO1 MJ#(0) ARGF11
 SFTOF
+MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF5.0
 MACRO1 MJ#(1) ARGF0.0 ARGF-9.0 ARGF-23.0 ARGF10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
-'LAS 19
+'--- Layer 18: Cap - far left wall deepest (Y+10, Z-25, Rx-10deg) ---
 *18
-MACRO1 MJ#(0) ARGF11
 SFTOF
+MACRO1 MJ#(0) ARGF11
 MACRO1 MJ#(2) ARGF1.2 ARGF1.5 ARGF25.0
 MACRO1 MJ#(1) ARGF0.0 ARGF10.0 ARGF-25.0 ARGF-10.0 ARGF0.0 ARGF0.0 ARGI25
 JUMP *LABEL
 *LABEL
-'--- Welding Sequence ---
-' P003 and P004 are now directly taught in TESTUF-ARNE.JBI
-' No need for dynamic construction - using taught points directly
-REFP 1 C00000
-REFP 2 C00001
-MOVJ C00002 T0000 VJ=50.00
-' Use taught P003 for weld start (from TESTUF-ARNE)
-MOVL P003 T0001 V=83.3 PL=0
-ARCON
-WVON AMP=D080 FREQ=D081 ANGL=D082
-' Use taught P004 for weld end (from TESTUF-ARNE)
-MOVL P004 T0002 V=5.8
-WVOF
-ARCOF
-MOVJ C00005 T0003 VJ=50.00
-MOVJ C00002 T0000 VJ=50.00
-INC B099
-SFTOF
-JUMP LABEL: B099 IF B099<B097
-SET B099 B097
+'==========================================================
+' WELDING SEQUENCE (common for all layers)
+' Executed after layer-specific shift/weave are configured.
+'==========================================================
+' Set reference points for weave direction calculation
+REFP 1 C00000                'Reference point 1 (defines weave plane)
+REFP 2 C00001                'Reference point 2 (defines weave direction)
+' Approach weld zone
+MOVJ C00002 T0000 VJ=50.00   'Joint move to approach position
+' Start welding
+MOVL P003 T0001 V=83.3 PL=0  'Linear move to ONDER weld start (P003 from TESTUF-ARNE)
+ARCON                         'Arc ON - start welding
+WVON AMP=D080 FREQ=D081 ANGL=D082  'Weaving ON with layer-specific parameters
+' Weld travel
+MOVL P004 T0002 V=5.8        'Linear weld to ONDER end (P004 from TESTUF-ARNE, 5.8mm/s)
+' End welding
+WVOF                          'Weaving OFF
+ARCOF                         'Arc OFF - stop welding
+' Retract from weld zone
+MOVJ C00005 T0003 VJ=50.00   'Joint move to retract position
+MOVJ C00002 T0000 VJ=50.00   'Return to approach position
+'--- Layer loop control ---
+INC B099                      'Increment current layer counter
+SFTOF                         'Clear shift for next iteration
+JUMP LABEL: B099 IF B099<B097 'Loop if more layers to weld
+SET B099 B097                 'Sync counter when done (for next MASTER call)
 END

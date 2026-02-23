@@ -7,34 +7,65 @@
 ///ATTR SC,RW,MC
 ///LVARS 0,2,0,0,0,0,0,0
 NOP
+'==========================================================
+' ESAB1JOB - ESAB Weld Job Selection Macro
+'==========================================================
+' Purpose: Selects and validates an ESAB welding job on the
+'          power source via MREG (M-Register) communication.
+'
+' Interface: HC ARC 1.4.0 / ESAB_EDGE 1.03
+' Argument: IARG#(1) = Weld job number to select
+'           (e.g., 10 for BOVEN, 11 for ONDER)
+'
+' I/O Signals:
+'   MREG#(188) = Job selection register (write)
+'   MREG#(182) = Active job confirmation register (read)
+'   IN#(34)    = Job ready status (ON = job loaded OK)
+'   IN#(49-52) = Weld fault status bits (all OFF = no fault)
+'   OT#(40)    = Error reset pulse output
+'   OT#(4092)  = Weld alarm trigger output
+'
+' Error Handling:
+'   1. Tries to select job directly via MREG#(188)
+'   2. If not confirmed, resets and retries once
+'   3. If still not confirmed, raises alarm 8000
+'   4. After selection, checks for active weld faults
+'==========================================================
 '198002 HC ARC 1.4.0
 '221931 ESAB_EDGE 1.03
 *TOP
-'JOB SELECT
-GETARG LI000 IARG#(1)
-SETREG MREG#(188) LI000
-'JOB EXISTS CHECK
-JUMP *JOBOK IF IN#(34)=ON
-TIMER T=0.20
-GETREG LI001 MREG#(182)
-JUMP *JOBOK IF LI000=LI001
-SETREG MREG#(188) 0
-TIMER T=0.20
-SETREG MREG#(188) LI000
-TIMER T=0.20
-GETREG LI001 MREG#(182)
-JUMP *JOBOK IF LI000=LI001
+'--- Step 1: Select weld job via M-Register ---
+GETARG LI000 IARG#(1)        'Read requested job number
+SETREG MREG#(188) LI000      'Write job number to power source
+'--- Step 2: Verify job exists on power source ---
+JUMP *JOBOK IF IN#(34)=ON    'Job ready signal already ON? Skip ahead
+TIMER T=0.20                 'Wait for power source response
+GETREG LI001 MREG#(182)      'Read back active job number
+JUMP *JOBOK IF LI000=LI001   'Active job matches request? Skip ahead
+'--- Step 3: Retry - Reset and re-select ---
+SETREG MREG#(188) 0          'Clear job selection
+TIMER T=0.20                 'Wait for reset
+SETREG MREG#(188) LI000      'Re-select requested job
+TIMER T=0.20                 'Wait for confirmation
+GETREG LI001 MREG#(182)      'Read back again
+JUMP *JOBOK IF LI000=LI001   'Match now? Proceed
+'--- Step 4: Job not found - Raise alarm ---
 SETUALM 8000 "WELD JOB DO NOT EXIST" 1
-JUMP *TOP
+JUMP *TOP                    'Wait for operator to acknowledge + retry
 *JOBOK
-'ERROR CHECK
+'--- Step 5: Check for active weld faults ---
+' IN#(49)=Wire feed, IN#(50)=Gas, IN#(51)=Water, IN#(52)=General
 JUMP *END IFEXPRESS IN#(49)=OFF ANDEXP IN#(50)=OFF ANDEXP IN#(51)=OFF ANDEXP IN#(52)=OFF
+' Fault detected - send reset pulse on OT#(40)
 PULSE OT#(40) T=1.00
+' Wait up to 2s for faults to clear
 WAIT FOREXPRESS IN#(49)=OFF ANDEXP IN#(50)=OFF ANDEXP IN#(51)=OFF ANDEXP IN#(52)=OFF T=2.00
+' If faults persist, trigger weld alarm
 'TRIGGER WELD ALARM
 PULSE OT#(4092) T=0.50 IFEXPRESS IN#(49)=ON OREXP IN#(50)=ON OREXP IN#(51)=ON OREXP IN#(52)=ON
 *END
-JUMP *END2 IF IN#(34)=ON
-TIMER T=0.50
+'--- Step 6: Final ready check ---
+JUMP *END2 IF IN#(34)=ON     'Job ready? Done
+TIMER T=0.50                 'Extra wait for readiness
 *END2
 END
