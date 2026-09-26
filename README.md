@@ -13,7 +13,7 @@ This devcontainer is running on a Hetzner VPS with:
 ### Connect via VS Code
 
 1. Install [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension
-2. SSH to VPS: `ssh root@89.167.13.134`
+2. SSH to VPS: `ssh root@`
 3. Open folder: `/root/claudecode_dev_container`
 4. Use "Attach to Running Container" → `claude-sandbox`
 
